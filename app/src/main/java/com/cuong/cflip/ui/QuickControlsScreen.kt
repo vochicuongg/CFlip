@@ -28,8 +28,8 @@ import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.RecentActors
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
@@ -93,7 +93,7 @@ fun QuickControlsScreen(modifier: Modifier = Modifier) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.Filled.VolumeUp, contentDescription = null,
+                    Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = null,
                         tint = CFlipColors.TextSecondary, modifier = Modifier.size(20.dp))
                     Text("Am luong ${volume.toInt()}/$volMax", fontSize = 13.sp,
                         color = CFlipColors.TextPrimary)
