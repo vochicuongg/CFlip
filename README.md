@@ -74,4 +74,3 @@ app/src/main/java/com/cuong/cflip/
 ├── control/  QuickControls (flashlight/volume/brightness/panels)
 └── widget/   CoverWidgetProvider (MultiStar route)
 ```
-"# CFlip" 
