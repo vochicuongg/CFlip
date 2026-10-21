@@ -122,7 +122,7 @@ class BubbleOverlayService : Service() {
             text = "CFlip Menu"; textSize = 15f; setTextColor(0xFFFFFFFF.toInt())
         })
         root.addView(TextView(ctx).apply {
-            text = "Thong bao dang cho: ${NotificationState.active.value.size}"
+            text = "Thông báo đang chờ: ${NotificationState.active.value.size}"
             textSize = 12f; setTextColor(0xFFCCCCCC.toInt())
         })
 
@@ -146,10 +146,10 @@ class BubbleOverlayService : Service() {
 
         val row = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL }
         row.addView(Button(ctx).apply {
-            text = if (QuickControls.torchOn) "Den: Bat" else "Den pin"
+            text = if (QuickControls.torchOn) "Đèn: Bật" else "Đèn pin"
             setOnClickListener {
                 val next = !QuickControls.torchOn
-                if (QuickControls.setTorch(ctx, next)) text = if (next) "Den: Bat" else "Den pin"
+                if (QuickControls.setTorch(ctx, next)) text = if (next) "Đèn: Bật" else "Đèn pin"
             }
         })
         row.addView(Button(ctx).apply {

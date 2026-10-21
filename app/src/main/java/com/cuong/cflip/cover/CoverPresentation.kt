@@ -60,7 +60,7 @@ class CoverPresentation(context: Context, display: Display) : Presentation(conte
             textSize = 13f; setTextColor(0xFFCCCCCC.toInt())
         })
         root.addView(TextView(context).apply {
-            text = "CFlip Launcher - Notifications: ${NotificationState.active.value.size}"
+            text = "CFlip Launcher · Thông báo: ${NotificationState.active.value.size}"
             textSize = 13f; setTextColor(0xFFFFFFFF.toInt())
         })
 
@@ -79,7 +79,7 @@ class CoverPresentation(context: Context, display: Display) : Presentation(conte
 
         if (favorites.isNotEmpty()) {
             root.addView(TextView(context).apply {
-                text = "Favorites"; textSize = 14f; setTextColor(0xFFFFFFFF.toInt())
+                text = "Yêu thích"; textSize = 14f; setTextColor(0xFFFFFFFF.toInt())
             })
             val grid = GridLayout(context).apply { columnCount = 4 }
             for (app in favorites) {
@@ -91,7 +91,7 @@ class CoverPresentation(context: Context, display: Display) : Presentation(conte
 
         if (recents.isNotEmpty()) {
             root.addView(TextView(context).apply {
-                text = "Recents"; textSize = 14f; setTextColor(0xFFFFFFFF.toInt())
+                text = "Gần đây"; textSize = 14f; setTextColor(0xFFFFFFFF.toInt())
             })
             for (app in recents) {
                 root.addView(Button(context).apply {
@@ -114,7 +114,7 @@ class CoverPresentation(context: Context, display: Display) : Presentation(conte
         root.addView(mediaRow)
 
         root.addView(Button(context).apply {
-            text = "Close"
+            text = "Đóng"
             setOnClickListener { dismiss() }
         })
 

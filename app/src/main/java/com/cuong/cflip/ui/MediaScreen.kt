@@ -61,20 +61,21 @@ fun MediaScreen(modifier: Modifier = Modifier) {
 
     Column(modifier = modifier.fillMaxSize().padding(top = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Nhac", fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+        Text("Âm nhạc", fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
             color = CFlipColors.TextPrimary, modifier = Modifier.fillMaxWidth())
         val m = media
         if (m == null) {
-            EmptyState(Icons.Filled.MusicNote, "Chua co bai nao dang phat",
-                "Mo YouTube Music / Spotify roi quay lai")
+            EmptyState(Icons.Filled.MusicNote, "Chưa có bài nào đang phát",
+                "Mở YouTube Music / Spotify rồi quay lại")
         } else {
             Spacer(Modifier.height(18.dp))
             // Disc: mint gradient ring while playing, quiet glass when paused.
             Box(
                 modifier = Modifier.size(148.dp).clip(CircleShape)
                     .background(
-                        if (m.isPlaying) Brush.linearGradient(
-                            listOf(CFlipColors.Accent, Color(0xFF2E8C6B)))
+                        if (m.isPlaying) Brush.sweepGradient(
+                            listOf(CFlipColors.Accent, Color(0xFF2E8C6B),
+                                Color(0xFF7FE3C0), CFlipColors.Accent))
                         else Brush.linearGradient(
                             listOf(Color(0xFF2A3330), Color(0xFF171D1B)))
                     ),

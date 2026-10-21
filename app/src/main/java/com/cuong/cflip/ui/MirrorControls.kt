@@ -72,7 +72,7 @@ fun MirrorControls() {
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Mirror & Dual Display", fontSize = 18.sp)
+        Text("Phản chiếu & Hai màn hình", fontSize = 18.sp)
         Text(
             "Phan chieu: sao chep man hinh chinh len cover theo thoi gian thuc. " +
                 "Luu y: gap kin thi man hinh chinh tat nen anh phan chieu se den - " +
@@ -85,16 +85,16 @@ fun MirrorControls() {
                 val mpm = context.getSystemService(MediaProjectionManager::class.java)
                 if (mpm != null) captureLauncher.launch(mpm.createScreenCaptureIntent())
                 else toast("Thiet bi khong ho tro MediaProjection")
-            }, modifier = Modifier.fillMaxWidth()) { Text("Bat phan chieu len cover") }
+            }, modifier = Modifier.fillMaxWidth()) { Text("Bật phản chiếu lên cover") }
         } else {
             Button(onClick = {
                 context.startService(Intent(context, ScreenMirrorService::class.java)
                     .setAction(ScreenMirrorService.ACTION_STOP))
                 coverService() // restore the normal cover launcher
-            }, modifier = Modifier.fillMaxWidth()) { Text("Dung phan chieu") }
+            }, modifier = Modifier.fillMaxWidth()) { Text("Dừng phản chiếu") }
         }
 
-        Text("Xoay noi dung cover: ${settings.coverRotation}°", fontSize = 13.sp)
+        Text("Xoay nội dung cover: ${settings.coverRotation}°", fontSize = 13.sp)
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             for (deg in listOf(0, 90, 180, 270)) {
                 OutlinedButton(onClick = {
@@ -116,7 +116,7 @@ fun MirrorControls() {
                 store.save(settings)
                 if (on) coverService() else coverService(CoverForegroundService.ACTION_HIDE_COVER)
             })
-            Text("Hai man hinh cung luc (cover UI chay ca khi dang dung man hinh chinh)", fontSize = 13.sp)
+            Text("Hai màn hình cùng lúc (giao diện cover chạy cả khi đang dùng màn hình chính)", fontSize = 13.sp)
         }
     }
 }

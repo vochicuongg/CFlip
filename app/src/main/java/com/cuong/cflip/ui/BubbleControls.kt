@@ -28,7 +28,7 @@ fun BubbleControls() {
     val canOverlay = remember { Settings.canDrawOverlays(context) }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Bong bong menu (khong can Good Lock)", fontSize = 18.sp)
+        Text("Bong bóng menu (không cần Good Lock)", fontSize = 18.sp)
         Text(
             "Bong bong 'C' noi tren man hinh: cham de mo menu nhanh (app yeu thich, " +
                 "den pin, nhac, khoa may). Keo de di chuyen bong bong.",
@@ -42,7 +42,7 @@ fun BubbleControls() {
                 ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(i)
                 Toast.makeText(context, "Bat 'Hien thi tren ung dung khac' cho CFlip", Toast.LENGTH_LONG).show()
-            }) { Text("Cap quyen hien thi tren ung dung khac") }
+            }) { Text("Cấp quyền hiển thị trên ứng dụng khác") }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Switch(checked = bubbleOn, onCheckedChange = { on ->
@@ -52,7 +52,7 @@ fun BubbleControls() {
                     else Toast.makeText(context, "Chua co quyen overlay", Toast.LENGTH_SHORT).show()
                 } else BubbleOverlayService.stop(context)
             })
-            Text("Hien bong bong menu", fontSize = 13.sp)
+            Text("Hiện bong bóng menu", fontSize = 13.sp)
         }
     }
 }

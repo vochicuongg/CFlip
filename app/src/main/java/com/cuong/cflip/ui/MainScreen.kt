@@ -48,7 +48,7 @@ fun MainScreen() {
 
     if (showCover) {
         Column(modifier = Modifier.fillMaxSize().background(CFlipColors.Bg)) {
-            TextButton(onClick = { showCover = false }) { Text("< Quay lai", color = CFlipColors.Accent) }
+            TextButton(onClick = { showCover = false }) { Text("← Quay lại", color = CFlipColors.Accent) }
             CoverApp(modifier = Modifier.weight(1f),
                 targetDisplayId = displayRepo.secondaryDisplay()?.displayId)
         }
@@ -64,80 +64,80 @@ fun MainScreen() {
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(modifier = Modifier.size(52.dp).clip(RoundedCornerShape(16.dp))
-                .background(CFlipColors.Accent), contentAlignment = Alignment.Center) {
+                .background(CFlipColors.AccentBrush), contentAlignment = Alignment.Center) {
                 Text("C", fontSize = 30.sp, fontWeight = FontWeight.Bold, color = CFlipColors.AccentDark)
             }
             Column {
                 Text("CFlip Launcher", fontSize = 24.sp, fontWeight = FontWeight.Bold,
                     color = CFlipColors.TextPrimary)
-                Text("Cover launcher cua Cuong - Z Flip5", fontSize = 13.sp,
+                Text("Cover launcher của Cường · Galaxy Z Flip5", fontSize = 13.sp,
                     color = CFlipColors.TextSecondary)
             }
         }
-        Text("Moi tinh nang deu mien phi, khong paywall. Ban 2.0 - giao dien moi.",
+        Text("Mọi tính năng đều miễn phí, không paywall. Bản 2.1 — giao diện cao cấp, tiếng Việt có dấu.",
             fontSize = 13.sp, color = CFlipColors.TextSecondary)
         GlassCard(modifier = Modifier.fillMaxWidth()) {
-            Text("Man hinh phat hien: " +
+            Text("Màn hình phát hiện: " +
                 displayRepo.listDisplays().joinToString { "#${it.id} ${it.name} ${it.widthPx}x${it.heightPx}" },
                 fontSize = 12.sp, color = CFlipColors.TextSecondary)
         }
 
-        SectionHeader("1 - CAP QUYEN")
+        SectionHeader("1 · CẤP QUYỀN")
         GlassCard(modifier = Modifier.fillMaxWidth()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) },
                     modifier = Modifier.fillMaxWidth()) {
-                    Text("Notification Access (thong bao + media)") }
+                    Text("Truy cập thông báo (thông báo + nhạc)") }
                 Button(onClick = { context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) },
                     modifier = Modifier.fillMaxWidth()) {
-                    Text("Accessibility (khoa may, Recents, Quick Settings)") }
+                    Text("Accessibility (khoá máy, Gần đây, Cài đặt nhanh)") }
                 Button(onClick = {
                     context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                         Uri.parse("package:" + context.packageName)))
-                }, modifier = Modifier.fillMaxWidth()) { Text("Overlay (hien tren ung dung khac)") }
+                }, modifier = Modifier.fillMaxWidth()) { Text("Hiển thị trên ứng dụng khác (Overlay)") }
                 OutlinedButton(onClick = { QuickControls.openUsageAccessSettings(context) },
                     modifier = Modifier.fillMaxWidth()) {
-                    Text("Usage Access (danh sach app gan day that)") }
+                    Text("Usage Access (danh sách ứng dụng gần đây thật)") }
                 OutlinedButton(onClick = { QuickControls.openWriteSettingsPermission(context) },
                     modifier = Modifier.fillMaxWidth()) {
-                    Text("Modify system settings (chinh do sang)") }
+                    Text("Sửa cài đặt hệ thống (chỉnh độ sáng)") }
             }
         }
 
-        SectionHeader("2 - COVER SERVICE")
+        SectionHeader("2 · DỊCH VỤ COVER")
         GlassCard(modifier = Modifier.fillMaxWidth()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = {
                     ContextCompat.startForegroundService(context, Intent(context, CoverForegroundService::class.java))
-                    Toast.makeText(context, "CFlip service started - gap may lai de thu", Toast.LENGTH_LONG).show()
-                }, modifier = Modifier.fillMaxWidth()) { Text("Start foreground service") }
+                    Toast.makeText(context, "Đã chạy dịch vụ CFlip — gập máy lại để thử", Toast.LENGTH_LONG).show()
+                }, modifier = Modifier.fillMaxWidth()) { Text("Bắt đầu dịch vụ chạy nền") }
                 OutlinedButton(onClick = { context.stopService(Intent(context, CoverForegroundService::class.java)) },
                     modifier = Modifier.fillMaxWidth()) {
-                    Text("Stop foreground service") }
+                    Text("Dừng dịch vụ") }
             }
         }
 
-        SectionHeader("3 - TEST COVER")
+        SectionHeader("3 · THỬ MÀN HÌNH PHỤ")
         GlassCard(modifier = Modifier.fillMaxWidth()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = { showCover = true }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Mo CFlip ngay tren man hinh chinh (test khong can gap)") }
+                    Text("Mở CFlip ngay trên màn hình chính (thử không cần gập)") }
                 Button(onClick = {
                     val secondary = displayRepo.secondaryDisplay()
                     if (secondary == null) {
                         Toast.makeText(context,
-                            "Chua thay man hinh phu. Tren Flip5 that: gap may lai. Tren emulator: them secondary display.",
+                            "Chưa thấy màn hình phụ. Trên Flip5 thật: gập máy lại. Trên emulator: thêm màn hình phụ.",
                             Toast.LENGTH_LONG).show()
                     } else {
                         presentation?.dismiss()
                         presentation = CoverPresentation(context, secondary).also {
                             runCatching { it.show() }.onFailure { e ->
-                                Toast.makeText(context, "Presentation bi chan: ${e.message}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(context, "Presentation bị chặn: ${e.message}", Toast.LENGTH_LONG).show()
                             }
                         }
                     }
-                }, modifier = Modifier.fillMaxWidth()) { Text("Show Presentation on secondary display") }
-                Text("Widget duong chinh thong: Good Lock > MultiStar > I Love Galaxy Foldable > Launcher Widget > them widget CFlip Launcher. Sau do vuot cover sang trang widget de dung.",
+                }, modifier = Modifier.fillMaxWidth()) { Text("Hiện Presentation lên màn hình phụ") }
+                Text("Đường chính thống bằng widget: Good Lock › MultiStar › I ♥ Galaxy Foldable › Launcher Widget › thêm widget CFlip Launcher. Sau đó vuốt cover sang trang widget để dùng.",
                     fontSize = 12.sp, color = CFlipColors.TextSecondary)
             }
         }

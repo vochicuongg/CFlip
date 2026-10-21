@@ -70,34 +70,34 @@ fun SettingsScreen(
 
     Column(modifier = modifier.fillMaxSize().padding(top = 8.dp).verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("Ca nhan hoa", fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+        Text("Cá nhân hóa", fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
             color = CFlipColors.TextPrimary)
 
-        SectionHeader("LUOI APP")
+        SectionHeader("LƯỚI ỨNG DỤNG")
         GlassCard(modifier = Modifier.fillMaxWidth()) {
             Column {
-                Text("So cot: ${if (columns.toInt() == 0) "Tu dong" else columns.toInt().toString()}",
+                Text("Số cột: ${if (columns.toInt() == 0) "Tự động" else columns.toInt().toString()}",
                     fontSize = 13.sp, color = CFlipColors.TextPrimary)
                 Slider(value = columns, onValueChange = { columns = it }, valueRange = 0f..6f, steps = 5,
                     onValueChangeFinished = { update(settings.copy(columns = columns.toInt())) },
                     colors = mintSlider(), modifier = Modifier.fillMaxWidth())
-                Text("Co icon: ${settings.iconSizeDp} dp", fontSize = 13.sp, color = CFlipColors.TextPrimary)
+                Text("Cỡ biểu tượng: ${settings.iconSizeDp} dp", fontSize = 13.sp, color = CFlipColors.TextPrimary)
                 Slider(value = settings.iconSizeDp.toFloat(),
                     onValueChange = { update(settings.copy(iconSizeDp = it.toInt())) },
                     valueRange = 40f..84f, colors = mintSlider(), modifier = Modifier.fillMaxWidth())
             }
         }
 
-        SectionHeader("HIEN THI")
+        SectionHeader("HIỂN THỊ")
         GlassCard(modifier = Modifier.fillMaxWidth()) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                SwitchRow("Hien nhan app", settings.showLabels) { update(settings.copy(showLabels = it)) }
-                SwitchRow("Yeu thich len truoc", settings.favoritesFirst) { update(settings.copy(favoritesFirst = it)) }
-                SwitchRow("Dong ho 24h", settings.clock24h) { update(settings.copy(clock24h = it)) }
+                SwitchRow("Hiện nhãn ứng dụng", settings.showLabels) { update(settings.copy(showLabels = it)) }
+                SwitchRow("Yêu thích lên trước", settings.favoritesFirst) { update(settings.copy(favoritesFirst = it)) }
+                SwitchRow("Đồng hồ 24 giờ", settings.clock24h) { update(settings.copy(clock24h = it)) }
             }
         }
 
-        SectionHeader("HINH NEN")
+        SectionHeader("HÌNH NỀN")
         GlassCard(modifier = Modifier.fillMaxWidth()) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -113,28 +113,28 @@ fun SettingsScreen(
                 Text(BackgroundStyles.names[settings.backgroundStyle.coerceIn(0, BackgroundStyles.names.lastIndex)],
                     fontSize = 12.sp, color = CFlipColors.TextSecondary)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { wallpaperPicker.launch("image/*") }) { Text("Chon anh nen") }
+                    Button(onClick = { wallpaperPicker.launch("image/*") }) { Text("Chọn ảnh nền") }
                     if (settings.wallpaperUri != null) {
-                        OutlinedButton(onClick = { update(settings.copy(wallpaperUri = null)) }) { Text("Bo anh nen") }
+                        OutlinedButton(onClick = { update(settings.copy(wallpaperUri = null)) }) { Text("Bỏ ảnh nền") }
                     }
                 }
             }
         }
 
-        SectionHeader("QUYEN")
+        SectionHeader("QUYỀN")
         GlassCard(modifier = Modifier.fillMaxWidth()) {
             OutlinedButton(onClick = { QuickControls.openUsageAccessSettings(context) },
                 modifier = Modifier.fillMaxWidth()) {
-                Text("Cap Usage Access (cho Recents that)")
+                Text("Cấp Usage Access (cho mục Gần đây thật)")
             }
         }
 
         // Hidden apps management (v1.3): unhide brings the app back everywhere.
-        SectionHeader("APP DA AN (${hiddenApps.size})")
+        SectionHeader("ỨNG DỤNG ĐÃ ẨN (${hiddenApps.size})")
         GlassCard(modifier = Modifier.fillMaxWidth()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (hiddenApps.isEmpty()) {
-                    Text("Chua an app nao. Giu mot app trong tab Apps de mo menu An.",
+                    Text("Chưa ẩn ứng dụng nào. Giữ một ứng dụng trong tab Ứng dụng để mở menu Ẩn.",
                         fontSize = 12.sp, color = CFlipColors.TextSecondary)
                 }
                 hiddenApps.forEach { app ->
@@ -142,7 +142,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically) {
                         Text(app.label, fontSize = 13.sp, color = CFlipColors.TextPrimary,
                             modifier = Modifier.weight(1f))
-                        OutlinedButton(onClick = { onUnhideApp(app) }) { Text("Hien lai") }
+                        OutlinedButton(onClick = { onUnhideApp(app) }) { Text("Hiện lại") }
                     }
                 }
             }

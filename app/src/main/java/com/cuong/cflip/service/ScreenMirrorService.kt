@@ -67,7 +67,7 @@ class ScreenMirrorService : Service() {
     private fun startMirroring(intent: Intent) {
         val notification: Notification = NotificationCompat.Builder(this, CFlipApp.CHANNEL_ID)
             .setContentTitle("CFlip Launcher")
-            .setContentText("Dang phan chieu man hinh chinh len cover")
+            .setContentText("Đang phản chiếu màn hình chính lên cover")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
             .build()

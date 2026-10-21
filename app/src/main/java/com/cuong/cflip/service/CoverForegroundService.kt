@@ -63,7 +63,7 @@ class CoverForegroundService : Service(), DisplayManager.DisplayListener,
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val notification: Notification = NotificationCompat.Builder(this, CFlipApp.CHANNEL_ID)
             .setContentTitle("CFlip Launcher")
-            .setContentText("Cover launcher is running")
+            .setContentText("Cover launcher đang chạy")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setOngoing(true)
             .build()

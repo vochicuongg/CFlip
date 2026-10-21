@@ -66,13 +66,13 @@ fun QuickControlsScreen(modifier: Modifier = Modifier) {
 
     Column(modifier = modifier.fillMaxSize().padding(top = 8.dp).verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("Dieu khien nhanh", fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+        Text("Điều khiển nhanh", fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
             color = CFlipColors.TextPrimary)
 
         // Flashlight: full-width state tile
         GlassCard(modifier = Modifier.fillMaxWidth(), onClick = {
             val next = !torch
-            if (QuickControls.setTorch(context, next)) torch = next else toast("Khong tim thay den flash")
+            if (QuickControls.setTorch(context, next)) torch = next else toast("Không tìm thấy đèn flash")
         }) {
             Row(verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -81,9 +81,9 @@ fun QuickControlsScreen(modifier: Modifier = Modifier) {
                     tint = if (torch) CFlipColors.Accent else CFlipColors.TextSecondary,
                     modifier = Modifier.size(26.dp))
                 Column {
-                    Text("Den flash", fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
+                    Text("Đèn flash", fontSize = 15.sp, fontWeight = FontWeight.SemiBold,
                         color = CFlipColors.TextPrimary)
-                    Text(if (torch) "Dang bat - cham de tat" else "Dang tat - cham de bat",
+                    Text(if (torch) "Đang bật · Chạm để tắt" else "Đang tắt · Chạm để bật",
                         fontSize = 12.sp, color = CFlipColors.TextSecondary)
                 }
             }
@@ -95,7 +95,7 @@ fun QuickControlsScreen(modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = null,
                         tint = CFlipColors.TextSecondary, modifier = Modifier.size(20.dp))
-                    Text("Am luong ${volume.toInt()}/$volMax", fontSize = 13.sp,
+                    Text("Âm lượng ${volume.toInt()}/$volMax", fontSize = 13.sp,
                         color = CFlipColors.TextPrimary)
                 }
                 Slider(value = volume,
@@ -109,23 +109,23 @@ fun QuickControlsScreen(modifier: Modifier = Modifier) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.Filled.BrightnessMedium, contentDescription = null,
                         tint = CFlipColors.TextSecondary, modifier = Modifier.size(20.dp))
-                    Text("Do sang ${brightness.toInt()}/255", fontSize = 13.sp,
+                    Text("Độ sáng ${brightness.toInt()}/255", fontSize = 13.sp,
                         color = CFlipColors.TextPrimary)
                 }
                 Slider(value = brightness, onValueChange = { brightness = it
-                    if (!QuickControls.setBrightness(context, it.toInt())) toast("Can cap quyen Modify system settings")
+                    if (!QuickControls.setBrightness(context, it.toInt())) toast("Cần cấp quyền sửa cài đặt hệ thống")
                 }, valueRange = 0f..255f,
                     colors = SliderDefaults.colors(thumbColor = CFlipColors.Accent,
                         activeTrackColor = CFlipColors.Accent,
                         inactiveTrackColor = CFlipColors.CardStroke),
                     modifier = Modifier.fillMaxWidth())
                 OutlinedButton(onClick = { QuickControls.openWriteSettingsPermission(context) }) {
-                    Text("Cap quyen chinh do sang he thong")
+                    Text("Cấp quyền chỉnh độ sáng hệ thống")
                 }
             }
         }
 
-        SectionHeader("MO PANEL")
+        SectionHeader("MỞ PANEL")
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
             ControlTile(Icons.Filled.Wifi, "Wi-Fi", Modifier.weight(1f)) { QuickControls.openWifiPanel(context) }
             ControlTile(Icons.Filled.Language, "Internet", Modifier.weight(1f)) { QuickControls.openInternetPanel(context) }
@@ -133,29 +133,29 @@ fun QuickControlsScreen(modifier: Modifier = Modifier) {
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
             ControlTile(Icons.Filled.Nfc, "NFC", Modifier.weight(1f)) { QuickControls.openNfcPanel(context) }
-            ControlTile(Icons.Filled.Settings, "Cai dat", Modifier.weight(1f)) { QuickControls.openDeviceSettings(context) }
+            ControlTile(Icons.Filled.Settings, "Cài đặt", Modifier.weight(1f)) { QuickControls.openDeviceSettings(context) }
             Spacer(Modifier.weight(1f))
         }
 
-        SectionHeader("HE THONG (CAN ACCESSIBILITY)")
+        SectionHeader("HỆ THỐNG · CẦN ACCESSIBILITY")
         if (a11y == null) {
-            Text("Accessibility chua bat - cac nut duoi se khong hoat dong.",
+            Text("Accessibility chưa bật — các nút dưới sẽ không hoạt động.",
                 fontSize = 12.sp, color = CFlipColors.Danger)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            ControlTile(Icons.Filled.Lock, "Khoa may", Modifier.weight(1f)) {
-                if (a11y?.lockScreen() != true) toast("Can Accessibility") }
-            ControlTile(Icons.Filled.RecentActors, "Gan day", Modifier.weight(1f)) {
-                if (a11y?.openRecents() != true) toast("Can Accessibility") }
+            ControlTile(Icons.Filled.Lock, "Khoá máy", Modifier.weight(1f)) {
+                if (a11y?.lockScreen() != true) toast("Cần bật Accessibility") }
+            ControlTile(Icons.Filled.RecentActors, "Gần đây", Modifier.weight(1f)) {
+                if (a11y?.openRecents() != true) toast("Cần bật Accessibility") }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-            ControlTile(Icons.Filled.Notifications, "Thong bao", Modifier.weight(1f)) {
-                if (a11y?.openNotifications() != true) toast("Can Accessibility") }
-            ControlTile(Icons.Filled.Tune, "Cai dat nhanh", Modifier.weight(1f)) {
-                if (a11y?.openQuickSettings() != true) toast("Can Accessibility") }
+            ControlTile(Icons.Filled.Notifications, "Thông báo", Modifier.weight(1f)) {
+                if (a11y?.openNotifications() != true) toast("Cần bật Accessibility") }
+            ControlTile(Icons.Filled.Tune, "Cài đặt nhanh", Modifier.weight(1f)) {
+                if (a11y?.openQuickSettings() != true) toast("Cần bật Accessibility") }
         }
 
-        SectionHeader("MO RONG")
+        SectionHeader("MỞ RỘNG")
         MirrorControls()
         BubbleControls()
         Spacer(Modifier.height(4.dp))

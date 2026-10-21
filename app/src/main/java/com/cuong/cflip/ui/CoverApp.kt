@@ -45,11 +45,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,12 +71,12 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 enum class CoverTab(val label: String, val icon: ImageVector) {
-    HOME("Home", Icons.Filled.Home),
-    APPS("Apps", Icons.Filled.GridView),
-    NOTIFS("Notif", Icons.Filled.Notifications),
-    MEDIA("Media", Icons.Filled.MusicNote),
-    QUICK("Quick", Icons.Filled.Bolt),
-    STYLE("Style", Icons.Filled.Palette)
+    HOME("Trang chủ", Icons.Filled.Home),
+    APPS("Ứng dụng", Icons.Filled.GridView),
+    NOTIFS("Thông báo", Icons.Filled.Notifications),
+    MEDIA("Nhạc", Icons.Filled.MusicNote),
+    QUICK("Tiện ích", Icons.Filled.Bolt),
+    STYLE("Cá nhân", Icons.Filled.Palette)
 }
 
 /**
@@ -154,6 +156,7 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
                 contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         }
         Box(modifier = Modifier.fillMaxSize().background(CFlipColors.Scrim))
+        Box(modifier = Modifier.fillMaxSize().background(CFlipColors.TopGlow))
 
         Column(modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp)) {
             if (tab != CoverTab.HOME) {
@@ -179,13 +182,13 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
                     CoverTab.APPS -> Column(modifier = Modifier.fillMaxSize()) {
                         OutlinedTextField(
                             value = search, onValueChange = { search = it },
-                            placeholder = { Text("Tim app") }, singleLine = true,
+                            placeholder = { Text("Tìm ứng dụng") }, singleLine = true,
                             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                             shape = RoundedCornerShape(20.dp),
                             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                         )
                         if (recentApps.isNotEmpty() && search.isEmpty()) {
-                            SectionHeader("GAN DAY")
+                            SectionHeader("GẦN ĐÂY")
                         }
                         val base = if (search.isEmpty()) {
                             (recentApps + appsOrdered).distinctBy { it.packageName }
@@ -234,7 +237,7 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
                             favorites = favoritesStore.getFavorites()
                             menuApp = null
                         }) {
-                            Text(if (app.packageName in favorites) "Bo ghim yeu thich" else "Ghim yeu thich")
+                            Text(if (app.packageName in favorites) "Bỏ ghim yêu thích" else "Ghim yêu thích")
                         }
                         if (app.packageName != context.packageName) {
                             TextButton(onClick = {
@@ -242,12 +245,12 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
                                 hidden = hiddenStore.getHidden()
                                 appsVersion++
                                 menuApp = null
-                            }) { Text("An app nay") }
+                            }) { Text("Ẩn ứng dụng này") }
                         }
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { menuApp = null }) { Text("Dong") }
+                    TextButton(onClick = { menuApp = null }) { Text("Đóng") }
                 },
             )
         }
@@ -290,8 +293,9 @@ private fun HomeTab(
 ) {
     val timeFmt = if (settings.clock24h) DateTimeFormatter.ofPattern("HH:mm") else DateTimeFormatter.ofPattern("hh:mm a")
     Column(modifier = Modifier.fillMaxSize().padding(top = 14.dp)) {
-        Text(now.format(timeFmt), fontSize = 56.sp, fontWeight = FontWeight.Bold,
-            letterSpacing = (-1).sp, color = CFlipColors.TextPrimary)
+        Text(now.format(timeFmt),
+            style = TextStyle(brush = CFlipColors.ClockBrush, fontSize = 56.sp,
+                fontWeight = FontWeight.Bold, letterSpacing = (-1).sp))
         Text(now.format(DateTimeFormatter.ofPattern("EEEE, dd/MM/yyyy")),
             fontSize = 14.sp, color = CFlipColors.TextSecondary)
         Spacer(Modifier.height(10.dp))
@@ -301,7 +305,7 @@ private fun HomeTab(
             }
             Box(modifier = Modifier.clickable { onOpenNotifs() }) {
                 StatusPill(icon = Icons.Filled.Notifications,
-                    text = if (notifCount > 0) "$notifCount thong bao moi" else "Khong co thong bao",
+                    text = if (notifCount > 0) "$notifCount thông báo mới" else "Không có thông báo",
                     tint = if (notifCount > 0) CFlipColors.Accent else CFlipColors.TextSecondary)
             }
         }
@@ -311,14 +315,14 @@ private fun HomeTab(
                 Row(verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Box(modifier = Modifier.size(38.dp).clip(CircleShape)
-                        .background(if (mediaPlaying) CFlipColors.Accent else CFlipColors.CardFill),
+                        .background(if (mediaPlaying) CFlipColors.AccentBrush else SolidColor(CFlipColors.CardFill)),
                         contentAlignment = Alignment.Center) {
                         Icon(Icons.Filled.MusicNote, contentDescription = null,
                             tint = if (mediaPlaying) CFlipColors.AccentDark else CFlipColors.TextSecondary,
                             modifier = Modifier.size(20.dp))
                     }
                     Column {
-                        Text("Dang phat", fontSize = 11.sp, color = CFlipColors.TextSecondary)
+                        Text("Đang phát", fontSize = 11.sp, color = CFlipColors.TextSecondary)
                         Text(mediaTitle, fontSize = 14.sp, fontWeight = FontWeight.Medium,
                             color = CFlipColors.TextPrimary, maxLines = 1)
                     }
@@ -326,11 +330,11 @@ private fun HomeTab(
             }
         }
         Spacer(Modifier.height(14.dp))
-        SectionHeader("YEU THICH")
+        SectionHeader("YÊU THÍCH")
         GlassCard(modifier = Modifier.fillMaxWidth().weight(1f)) {
             if (favApps.isEmpty()) {
-                EmptyState(Icons.Filled.Home, "Chua ghim app nao",
-                    "Sang tab Apps, giu mot app de ghim vao day")
+                EmptyState(Icons.Filled.Home, "Chưa ghim ứng dụng nào",
+                    "Sang tab Ứng dụng, giữ một ứng dụng để ghim vào đây")
             } else {
                 CoverLauncherScreen(
                     apps = favApps,
@@ -342,7 +346,7 @@ private fun HomeTab(
                 )
             }
         }
-        Text("Vuot ngang de chuyen tab - Giu app de mo menu",
+        Text("Vuốt ngang để chuyển tab · Giữ ứng dụng để mở menu",
             fontSize = 11.sp, color = CFlipColors.TextFaint,
             modifier = Modifier.padding(top = 8.dp, start = 4.dp))
     }
@@ -370,7 +374,7 @@ private fun PillNav(
             Box(
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(if (selected) CFlipColors.Accent else Color.Transparent)
+                    .background(if (selected) CFlipColors.AccentBrush else SolidColor(Color.Transparent))
                     .clickable { onSelect(t) }
                     .padding(horizontal = if (selected) 12.dp else 9.dp, vertical = 8.dp),
                 contentAlignment = Alignment.Center,

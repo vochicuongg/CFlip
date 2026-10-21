@@ -48,14 +48,14 @@ fun NotificationsScreen(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxSize().padding(top = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Thong bao", fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+            Text("Thông báo", fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
                 color = CFlipColors.TextPrimary)
             if (notifications.isNotEmpty()) {
                 StatusPill(icon = null, text = notifications.size.toString())
             }
         }
         if (!NotificationController.isConnected()) {
-            Text("Notification Access chua duoc cap - vao man hinh chinh cua CFlip de cap quyen.",
+            Text("Chưa cấp quyền truy cập thông báo — vào màn hình chính của CFlip để cấp quyền.",
                 fontSize = 12.sp, color = CFlipColors.Danger, modifier = Modifier.padding(top = 4.dp))
         }
         if (replyTarget != null) {
@@ -63,7 +63,7 @@ fun NotificationsScreen(modifier: Modifier = Modifier) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                 OutlinedTextField(value = replyText, onValueChange = { replyText = it },
-                    placeholder = { Text("Tra loi...") }, singleLine = true,
+                    placeholder = { Text("Trả lời...") }, singleLine = true,
                     shape = RoundedCornerShape(20.dp), modifier = Modifier.weight(1f))
                 IconButton(onClick = {
                     NotificationController.reply(replyTarget!!, replyText)
@@ -72,8 +72,8 @@ fun NotificationsScreen(modifier: Modifier = Modifier) {
             }
         }
         if (notifications.isEmpty()) {
-            EmptyState(Icons.Filled.NotificationsOff, "Khong co thong bao",
-                "Thong bao moi se hien o day")
+            EmptyState(Icons.Filled.NotificationsOff, "Không có thông báo",
+                "Thông báo mới sẽ hiện ở đây")
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.padding(top = 8.dp)) {
@@ -93,9 +93,9 @@ fun NotificationsScreen(modifier: Modifier = Modifier) {
                             }
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 modifier = Modifier.padding(top = 8.dp)) {
-                                ActionChip("Mo") { NotificationController.open(n.key) }
-                                ActionChip("Xoa") { NotificationController.dismiss(n.key) }
-                                if (n.canReply) ActionChip("Tra loi") { replyTarget = n.key }
+                                ActionChip("Mở") { NotificationController.open(n.key) }
+                                ActionChip("Xoá") { NotificationController.dismiss(n.key) }
+                                if (n.canReply) ActionChip("Trả lời") { replyTarget = n.key }
                                 n.actionTitles.forEachIndexed { index, title ->
                                     if (title.isNotEmpty()) {
                                         ActionChip(title) { NotificationController.clickAction(n.key, index) }
