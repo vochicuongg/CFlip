@@ -7,10 +7,16 @@ import android.content.pm.PackageManager
 /** Lists every app that can be launched - the data source for the cover app drawer. */
 class AppRepository(private val context: Context) {
 
-    fun loadLaunchableApps(): List<AppInfo> {
+    /**
+     * Launchable apps, alphabetically. Apps the user hid (HiddenAppsStore)
+     * are filtered out here so every surface - Compose UI, Presentation,
+     * widget, bubble - respects the hidden list. Pass includeHidden = true
+     * only for the management UI that lists hidden apps to unhide them.
+     */
+    fun loadLaunchableApps(includeHidden: Boolean = false): List<AppInfo> {
         val pm = context.packageManager
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        return pm.queryIntentActivities(intent, PackageManager.MATCH_ALL)
+        val apps = pm.queryIntentActivities(intent, PackageManager.MATCH_ALL)
             .map { ri ->
                 AppInfo(
                     packageName = ri.activityInfo.packageName,
@@ -20,5 +26,9 @@ class AppRepository(private val context: Context) {
             }
             .distinctBy { it.packageName }
             .sortedBy { it.label.lowercase() }
+        if (includeHidden) return apps
+        val hidden = HiddenAppsStore(context).getHidden()
+        if (hidden.isEmpty()) return apps
+        return apps.filterNot { it.packageName in hidden }
     }
 }

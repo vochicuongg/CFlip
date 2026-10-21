@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,10 +31,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cuong.cflip.data.AppInfo
 import com.cuong.cflip.data.AppRepository
 import com.cuong.cflip.data.BackgroundStyles
 import com.cuong.cflip.data.CoverSettings
 import com.cuong.cflip.data.FavoritesStore
+import com.cuong.cflip.data.HiddenAppsStore
 import com.cuong.cflip.data.RecentAppsRepository
 import com.cuong.cflip.data.SettingsStore
 import com.cuong.cflip.display.AppLauncher
@@ -58,10 +61,18 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
     val context = LocalContext.current
     val appRepo = remember { AppRepository(context) }
     val favoritesStore = remember { FavoritesStore(context) }
+    val hiddenStore = remember { HiddenAppsStore(context) }
     val settingsStore = remember { SettingsStore(context) }
     val recentRepo = remember { RecentAppsRepository(context) }
 
-    val allApps = remember { appRepo.loadLaunchableApps() }
+    // appsVersion bumps whenever the hidden set changes so the lists reload.
+    var appsVersion by remember { mutableStateOf(0) }
+    val allApps = remember(appsVersion) { appRepo.loadLaunchableApps() }
+    var hidden by remember { mutableStateOf(hiddenStore.getHidden()) }
+    val hiddenApps = remember(appsVersion) {
+        appRepo.loadLaunchableApps(includeHidden = true).filter { it.packageName in hidden }
+    }
+    var menuApp by remember { mutableStateOf<AppInfo?>(null) }
     var favorites by remember { mutableStateOf(favoritesStore.getFavorites()) }
     var settings by remember { mutableStateOf(settingsStore.load()) }
     var tab by remember { mutableStateOf(CoverTab.HOME) }
@@ -118,7 +129,7 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
                         CoverClock(settings)
                         Text("Thong bao moi: ${notifications.size}", fontSize = 13.sp, color = Color.White)
                         media?.let { Text("Dang phat: ${it.title}", fontSize = 13.sp, color = Color.White, maxLines = 1) }
-                        Text("Yeu thich (nhan mo, giu de bo ghim)", fontSize = 13.sp, color = Color.White)
+                        Text("Yeu thich (nhan mo, giu de mo menu)", fontSize = 13.sp, color = Color.White)
                         CoverLauncherScreen(
                             apps = favApps,
                             favorites = favorites,
@@ -128,6 +139,7 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
                                 favoritesStore.toggle(app.packageName)
                                 favorites = favoritesStore.getFavorites()
                             },
+                            onAppMenu = { menuApp = it },
                         )
                     }
                     CoverTab.APPS -> Column(modifier = Modifier.fillMaxSize()) {
@@ -148,13 +160,20 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
                                 favoritesStore.toggle(app.packageName)
                                 favorites = favoritesStore.getFavorites()
                             },
+                            onAppMenu = { menuApp = it },
                         )
                     }
                     CoverTab.NOTIFS -> NotificationsScreen()
                     CoverTab.MEDIA -> MediaScreen()
                     CoverTab.QUICK -> QuickControlsScreen()
                     CoverTab.STYLE -> SettingsScreen(settings = settings,
-                        onSettingsChange = { settings = it })
+                        onSettingsChange = { settings = it },
+                        hiddenApps = hiddenApps,
+                        onUnhideApp = { app ->
+                            hiddenStore.unhide(app.packageName)
+                            hidden = hiddenStore.getHidden()
+                            appsVersion++
+                        })
                 }
             }
             // Bottom tab bar - compact for the small cover screen
@@ -167,6 +186,36 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
                     }
                 }
             }
+        }
+
+        // Long-press app menu: favourite toggle + hide (v1.3)
+        menuApp?.let { app ->
+            AlertDialog(
+                onDismissRequest = { menuApp = null },
+                title = { Text(app.label) },
+                text = {
+                    Column {
+                        TextButton(onClick = {
+                            favoritesStore.toggle(app.packageName)
+                            favorites = favoritesStore.getFavorites()
+                            menuApp = null
+                        }) {
+                            Text(if (app.packageName in favorites) "Bo ghim yeu thich" else "Ghim yeu thich")
+                        }
+                        if (app.packageName != context.packageName) {
+                            TextButton(onClick = {
+                                hiddenStore.hide(app.packageName)
+                                hidden = hiddenStore.getHidden()
+                                appsVersion++
+                                menuApp = null
+                            }) { Text("An app nay") }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { menuApp = null }) { Text("Dong") }
+                },
+            )
         }
     }
 }

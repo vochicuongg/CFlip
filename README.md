@@ -19,6 +19,7 @@ mở sẵn, **không paywall, không premium**: tính năng nào làm được l
 | Quick controls | ✅ Đèn flash, âm lượng, độ sáng, panel Wi-Fi/Internet/NFC, Bluetooth, Settings |
 | System actions | ✅ Khóa máy, Recents, mở khay thông báo, Quick Settings (qua Accessibility) |
 | Cá nhân hóa | ✅ Số cột lưới (Auto/3–6), cỡ icon, ẩn/hiện nhãn, màu nền, **hình nền cover tự chọn**, đồng hồ 24h, favorites first |
+| Ẩn app (Hidden Apps) | ✅ **v1.3** — giữ app để mở menu → Ẩn app này; app ẩn biến mất khỏi mọi bề mặt (lọc trong AppRepository), quản lý/hiện lại ở tab Style. Lộ trình tính năng v2 đầy đủ: `FEATURES-V2.md` |
 | Hiển thị lên màn hình phụ thật | ✅ `CoverPresentation` + foreground service tự show khi có display phụ, tự ẩn khi mất |
 | Đường chính thống Samsung | ✅ Widget cho Good Lock / MultiStar Launcher Widget |
 | Không root / không ADB / không Shizuku khi dùng | ✅ Chỉ cấp quyền Android bình thường trong Settings |

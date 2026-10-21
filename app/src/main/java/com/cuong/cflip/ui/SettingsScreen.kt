@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cuong.cflip.control.QuickControls
+import com.cuong.cflip.data.AppInfo
 import com.cuong.cflip.data.BackgroundStyles
 import com.cuong.cflip.data.CoverSettings
 import com.cuong.cflip.data.SettingsStore
@@ -44,6 +45,8 @@ fun SettingsScreen(
     settings: CoverSettings,
     onSettingsChange: (CoverSettings) -> Unit,
     modifier: Modifier = Modifier,
+    hiddenApps: List<AppInfo> = emptyList(),
+    onUnhideApp: (AppInfo) -> Unit = {},
 ) {
     val context = LocalContext.current
     val store = remember { SettingsStore(context) }
@@ -107,6 +110,18 @@ fun SettingsScreen(
 
         OutlinedButton(onClick = { QuickControls.openUsageAccessSettings(context) }) {
             Text("Cap Usage Access (cho Recents that)")
+        }
+
+        // Hidden apps management (v1.3): unhide brings the app back everywhere.
+        Text("App da an (${hiddenApps.size})", fontSize = 14.sp)
+        if (hiddenApps.isEmpty()) {
+            Text("Chua an app nao. Giu mot app trong tab Apps de mo menu An.", fontSize = 12.sp)
+        }
+        hiddenApps.forEach { app ->
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(app.label, fontSize = 13.sp)
+                OutlinedButton(onClick = { onUnhideApp(app) }) { Text("Hien lai") }
+            }
         }
     }
 }

@@ -21,7 +21,9 @@ import com.cuong.cflip.data.AppInfo
 import com.cuong.cflip.data.CoverSettings
 
 /**
- * The cover app grid. Tap = launch, long-press = pin/unpin favourite.
+ * The cover app grid. Tap = launch. Long-press = pin/unpin favourite,
+ * or opens the app menu (onAppMenu) when the caller provides one -
+ * the menu adds Hide-app since v1.3.
  * Designed against the real cover sizes: Flip 5/6 = 720x748, Flip 7 = 948x1048.
  */
 @OptIn(ExperimentalFoundationApi::class)
@@ -33,6 +35,7 @@ fun CoverLauncherScreen(
     onAppClick: (AppInfo) -> Unit,
     onToggleFavorite: (AppInfo) -> Unit,
     modifier: Modifier = Modifier,
+    onAppMenu: ((AppInfo) -> Unit)? = null,
 ) {
     val columns = if (settings.columns in 3..6) GridCells.Fixed(settings.columns)
         else GridCells.Adaptive(minSize = (settings.iconSizeDp + 28).dp)
@@ -50,7 +53,7 @@ fun CoverLauncherScreen(
                 modifier = Modifier
                     .combinedClickable(
                         onClick = { onAppClick(app) },
-                        onLongClick = { onToggleFavorite(app) }
+                        onLongClick = { if (onAppMenu != null) onAppMenu(app) else onToggleFavorite(app) }
                     )
                     .padding(4.dp)
             ) {
