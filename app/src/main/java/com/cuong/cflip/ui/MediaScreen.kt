@@ -1,21 +1,42 @@
 package com.cuong.cflip.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cuong.cflip.media.MediaControllerRepository
@@ -27,7 +48,7 @@ private fun fmt(ms: Long): String {
     return "%d:%02d".format(s / 60, s % 60)
 }
 
-/** Full media card: metadata, play/pause, skip, seek. Polls the session every second. */
+/** Media tab (2.0): centred disc, big play button, mint seek bar. Polls the session every second. */
 @Composable
 fun MediaScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -38,29 +59,91 @@ fun MediaScreen(modifier: Modifier = Modifier) {
         while (true) { repo.refresh(); delay(1000) }
     }
 
-    Column(modifier = modifier.fillMaxSize().padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Media", fontSize = 18.sp)
+    Column(modifier = modifier.fillMaxSize().padding(top = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Nhac", fontSize = 20.sp, fontWeight = FontWeight.SemiBold,
+            color = CFlipColors.TextPrimary, modifier = Modifier.fillMaxWidth())
         val m = media
         if (m == null) {
-            Text("Chua co phien phat nhac nao. Mo YouTube Music / Spotify roi quay lai.", fontSize = 13.sp)
+            EmptyState(Icons.Filled.MusicNote, "Chua co bai nao dang phat",
+                "Mo YouTube Music / Spotify roi quay lai")
         } else {
-            Text(m.title, fontSize = 16.sp, maxLines = 2)
-            if (m.artist.isNotEmpty()) Text(m.artist, fontSize = 13.sp, maxLines = 1)
+            Spacer(Modifier.height(18.dp))
+            // Disc: mint gradient ring while playing, quiet glass when paused.
+            Box(
+                modifier = Modifier.size(148.dp).clip(CircleShape)
+                    .background(
+                        if (m.isPlaying) Brush.linearGradient(
+                            listOf(CFlipColors.Accent, Color(0xFF2E8C6B)))
+                        else Brush.linearGradient(
+                            listOf(Color(0xFF2A3330), Color(0xFF171D1B)))
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(modifier = Modifier.size(52.dp).clip(CircleShape)
+                    .background(CFlipColors.Bg), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Filled.MusicNote, contentDescription = null,
+                        tint = if (m.isPlaying) CFlipColors.Accent else CFlipColors.TextSecondary,
+                        modifier = Modifier.size(26.dp))
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            Text(m.title, fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
+                color = CFlipColors.TextPrimary, maxLines = 2, textAlign = TextAlign.Center)
+            if (m.artist.isNotEmpty()) {
+                Text(m.artist, fontSize = 13.sp, color = CFlipColors.TextSecondary,
+                    maxLines = 1, textAlign = TextAlign.Center)
+            }
             if (m.durationMs > 0) {
+                Spacer(Modifier.height(8.dp))
                 Slider(
                     value = m.positionMs.toFloat(),
                     onValueChange = { repo.seekTo(it.toLong()) },
                     valueRange = 0f..m.durationMs.toFloat(),
-                    modifier = Modifier.fillMaxWidth()
+                    colors = SliderDefaults.colors(
+                        thumbColor = CFlipColors.Accent,
+                        activeTrackColor = CFlipColors.Accent,
+                        inactiveTrackColor = CFlipColors.CardStroke,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
                 )
-                Text("${fmt(m.positionMs)} / ${fmt(m.durationMs)}", fontSize = 11.sp)
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Text(fmt(m.positionMs), fontSize = 11.sp, color = CFlipColors.TextFaint)
+                    Spacer(Modifier.weight(1f))
+                    Text(fmt(m.durationMs), fontSize = 11.sp, color = CFlipColors.TextFaint)
+                }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { repo.previous() }) { Text("Prev") }
-                Button(onClick = { repo.playPause() }) { Text(if (m.isPlaying) "Pause" else "Play") }
-                Button(onClick = { repo.next() }) { Text("Next") }
+            Spacer(Modifier.height(14.dp))
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                RoundControl(Icons.Filled.SkipPrevious, 52.dp, false) { repo.previous() }
+                RoundControl(
+                    if (m.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    72.dp, true,
+                ) { repo.playPause() }
+                RoundControl(Icons.Filled.SkipNext, 52.dp, false) { repo.next() }
             }
         }
+    }
+}
+
+/** Circular media button: filled mint for the primary action, glass otherwise. */
+@Composable
+private fun RoundControl(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    size: androidx.compose.ui.unit.Dp,
+    primary: Boolean,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier.size(size).clip(CircleShape)
+            .background(if (primary) CFlipColors.Accent else CFlipColors.CardFill)
+            .border(1.dp, CFlipColors.CardStroke, CircleShape)
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = null,
+            tint = if (primary) CFlipColors.AccentDark else CFlipColors.TextPrimary,
+            modifier = Modifier.size(size * 0.5f))
     }
 }

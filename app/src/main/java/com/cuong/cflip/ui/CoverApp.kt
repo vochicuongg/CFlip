@@ -4,15 +4,33 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -23,12 +41,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cuong.cflip.data.AppInfo
@@ -46,15 +68,21 @@ import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-enum class CoverTab(val label: String) {
-    HOME("Home"), APPS("Apps"), NOTIFS("Notif"), MEDIA("Media"), QUICK("Quick"), STYLE("Style")
+enum class CoverTab(val label: String, val icon: ImageVector) {
+    HOME("Home", Icons.Filled.Home),
+    APPS("Apps", Icons.Filled.GridView),
+    NOTIFS("Notif", Icons.Filled.Notifications),
+    MEDIA("Media", Icons.Filled.MusicNote),
+    QUICK("Quick", Icons.Filled.Bolt),
+    STYLE("Style", Icons.Filled.Palette)
 }
 
 /**
- * The complete cover experience: 6 tabs, swipe left/right to switch,
- * favourites, recents, notifications, media, quick controls, personalisation.
- * Used in-app (test on the main screen), and mirrored by CoverPresentation
- * on the real cover display.
+ * The complete cover experience, redesigned in CFlip 2.0:
+ * glass cards, one mint accent, a floating pill nav, a slim status row,
+ * and a hero Home (clock, battery, now playing, favourites).
+ * All behaviour (favourites, hidden apps, recents, notifications, media,
+ * quick controls, personalisation) is unchanged from v1.x.
  */
 @Composable
 fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
@@ -80,6 +108,11 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
 
     val notifications by NotificationState.active.collectAsState()
     val media by MediaState.current.collectAsState()
+    val batteryPct = rememberBatteryPercent()
+    val charging = remember(batteryPct) { readBatteryCharging(context) }
+
+    var now by remember { mutableStateOf(LocalDateTime.now()) }
+    LaunchedEffect(Unit) { while (true) { now = LocalDateTime.now(); delay(1000) } }
 
     val byPackage = remember(allApps) { allApps.associateBy { it.packageName } }
     val favApps = favorites.mapNotNull { byPackage[it] }
@@ -90,7 +123,6 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
         if (settings.favoritesFirst) allApps.sortedByDescending { it.packageName in favorites } else allApps
     }
 
-    // Background: wallpaper image if chosen, else the selected colour
     val wallpaperBitmap = remember(settings.wallpaperUri) {
         settings.wallpaperUri?.let { uriStr ->
             runCatching {
@@ -121,32 +153,39 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
             Image(bitmap = wallpaperBitmap.asImageBitmap(), contentDescription = null,
                 contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
         }
-        Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().background(CFlipColors.Scrim))
+
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp)) {
+            if (tab != CoverTab.HOME) {
+                StatusRow(now = now, settings = settings, batteryPct = batteryPct, charging = charging)
+            }
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 when (tab) {
-                    CoverTab.HOME -> Column(modifier = Modifier.fillMaxSize().padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        CoverClock(settings)
-                        Text("Thong bao moi: ${notifications.size}", fontSize = 13.sp, color = Color.White)
-                        media?.let { Text("Dang phat: ${it.title}", fontSize = 13.sp, color = Color.White, maxLines = 1) }
-                        Text("Yeu thich (nhan mo, giu de mo menu)", fontSize = 13.sp, color = Color.White)
-                        CoverLauncherScreen(
-                            apps = favApps,
-                            favorites = favorites,
-                            settings = settings,
-                            onAppClick = { AppLauncher.launch(context, it.packageName, targetDisplayId) },
-                            onToggleFavorite = { app ->
-                                favoritesStore.toggle(app.packageName)
-                                favorites = favoritesStore.getFavorites()
-                            },
-                            onAppMenu = { menuApp = it },
-                        )
-                    }
+                    CoverTab.HOME -> HomeTab(
+                        now = now, settings = settings,
+                        batteryPct = batteryPct, charging = charging,
+                        notifCount = notifications.size,
+                        mediaTitle = media?.title, mediaPlaying = media?.isPlaying == true,
+                        favApps = favApps, favorites = favorites,
+                        onOpenMedia = { tab = CoverTab.MEDIA },
+                        onOpenNotifs = { tab = CoverTab.NOTIFS },
+                        onAppClick = { AppLauncher.launch(context, it.packageName, targetDisplayId) },
+                        onToggleFavorite = { app ->
+                            favoritesStore.toggle(app.packageName)
+                            favorites = favoritesStore.getFavorites()
+                        },
+                        onAppMenu = { menuApp = it },
+                    )
                     CoverTab.APPS -> Column(modifier = Modifier.fillMaxSize()) {
-                        OutlinedTextField(value = search, onValueChange = { search = it },
-                            label = { Text("Tim app") }, modifier = Modifier.fillMaxWidth().padding(8.dp))
+                        OutlinedTextField(
+                            value = search, onValueChange = { search = it },
+                            placeholder = { Text("Tim app") }, singleLine = true,
+                            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        )
                         if (recentApps.isNotEmpty() && search.isEmpty()) {
-                            Text("  Gan day", fontSize = 13.sp, color = Color.White)
+                            SectionHeader("GAN DAY")
                         }
                         val base = if (search.isEmpty()) {
                             (recentApps + appsOrdered).distinctBy { it.packageName }
@@ -176,16 +215,11 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
                         })
                 }
             }
-            // Bottom tab bar - compact for the small cover screen
-            Row(modifier = Modifier.fillMaxWidth().background(Color(0xCC111111)),
-                horizontalArrangement = Arrangement.SpaceEvenly) {
-                tabs.forEach { t ->
-                    TextButton(onClick = { tab = t }) {
-                        Text(t.label, fontSize = 12.sp,
-                            color = if (t == tab) Color(0xFF7FE3C0) else Color.White)
-                    }
-                }
-            }
+            PillNav(
+                tabs = tabs, current = tab,
+                notifCount = notifications.size,
+                onSelect = { tab = it },
+            )
         }
 
         // Long-press app menu: favourite toggle + hide (v1.3)
@@ -220,11 +254,144 @@ fun CoverApp(modifier: Modifier = Modifier, targetDisplayId: Int? = null) {
     }
 }
 
+/** Slim clock + battery row shown above every tab except Home. */
 @Composable
-private fun CoverClock(settings: CoverSettings) {
-    var now by remember { mutableStateOf(LocalDateTime.now()) }
-    LaunchedEffect(Unit) { while (true) { now = LocalDateTime.now(); delay(1000) } }
+private fun StatusRow(now: LocalDateTime, settings: CoverSettings, batteryPct: Int, charging: Boolean) {
     val timeFmt = if (settings.clock24h) DateTimeFormatter.ofPattern("HH:mm") else DateTimeFormatter.ofPattern("hh:mm a")
-    Text(now.format(timeFmt), fontSize = 44.sp, color = Color.White)
-    Text(now.format(DateTimeFormatter.ofPattern("EEE, dd/MM")), fontSize = 14.sp, color = Color.White)
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(now.format(timeFmt), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = CFlipColors.TextPrimary)
+        Text("  " + now.format(DateTimeFormatter.ofPattern("EEE, dd/MM")), fontSize = 12.sp, color = CFlipColors.TextSecondary)
+        Spacer(Modifier.weight(1f))
+        if (batteryPct >= 0) {
+            StatusPill(icon = if (charging) Icons.Filled.Bolt else null, text = "$batteryPct%")
+        }
+    }
+}
+
+@Composable
+private fun HomeTab(
+    now: LocalDateTime,
+    settings: CoverSettings,
+    batteryPct: Int,
+    charging: Boolean,
+    notifCount: Int,
+    mediaTitle: String?,
+    mediaPlaying: Boolean,
+    favApps: List<AppInfo>,
+    favorites: Set<String>,
+    onOpenMedia: () -> Unit,
+    onOpenNotifs: () -> Unit,
+    onAppClick: (AppInfo) -> Unit,
+    onToggleFavorite: (AppInfo) -> Unit,
+    onAppMenu: (AppInfo) -> Unit,
+) {
+    val timeFmt = if (settings.clock24h) DateTimeFormatter.ofPattern("HH:mm") else DateTimeFormatter.ofPattern("hh:mm a")
+    Column(modifier = Modifier.fillMaxSize().padding(top = 14.dp)) {
+        Text(now.format(timeFmt), fontSize = 56.sp, fontWeight = FontWeight.Bold,
+            letterSpacing = (-1).sp, color = CFlipColors.TextPrimary)
+        Text(now.format(DateTimeFormatter.ofPattern("EEEE, dd/MM/yyyy")),
+            fontSize = 14.sp, color = CFlipColors.TextSecondary)
+        Spacer(Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (batteryPct >= 0) {
+                StatusPill(icon = if (charging) Icons.Filled.Bolt else null, text = "Pin $batteryPct%")
+            }
+            Box(modifier = Modifier.clickable { onOpenNotifs() }) {
+                StatusPill(icon = Icons.Filled.Notifications,
+                    text = if (notifCount > 0) "$notifCount thong bao moi" else "Khong co thong bao",
+                    tint = if (notifCount > 0) CFlipColors.Accent else CFlipColors.TextSecondary)
+            }
+        }
+        if (mediaTitle != null) {
+            Spacer(Modifier.height(10.dp))
+            GlassCard(modifier = Modifier.fillMaxWidth(), onClick = onOpenMedia) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Box(modifier = Modifier.size(38.dp).clip(CircleShape)
+                        .background(if (mediaPlaying) CFlipColors.Accent else CFlipColors.CardFill),
+                        contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.MusicNote, contentDescription = null,
+                            tint = if (mediaPlaying) CFlipColors.AccentDark else CFlipColors.TextSecondary,
+                            modifier = Modifier.size(20.dp))
+                    }
+                    Column {
+                        Text("Dang phat", fontSize = 11.sp, color = CFlipColors.TextSecondary)
+                        Text(mediaTitle, fontSize = 14.sp, fontWeight = FontWeight.Medium,
+                            color = CFlipColors.TextPrimary, maxLines = 1)
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.height(14.dp))
+        SectionHeader("YEU THICH")
+        GlassCard(modifier = Modifier.fillMaxWidth().weight(1f)) {
+            if (favApps.isEmpty()) {
+                EmptyState(Icons.Filled.Home, "Chua ghim app nao",
+                    "Sang tab Apps, giu mot app de ghim vao day")
+            } else {
+                CoverLauncherScreen(
+                    apps = favApps,
+                    favorites = favorites,
+                    settings = settings,
+                    onAppClick = onAppClick,
+                    onToggleFavorite = onToggleFavorite,
+                    onAppMenu = onAppMenu,
+                )
+            }
+        }
+        Text("Vuot ngang de chuyen tab - Giu app de mo menu",
+            fontSize = 11.sp, color = CFlipColors.TextFaint,
+            modifier = Modifier.padding(top = 8.dp, start = 4.dp))
+    }
+}
+
+/** Floating pill navigation: selected tab gets a filled mint pill + label. */
+@Composable
+private fun PillNav(
+    tabs: List<CoverTab>,
+    current: CoverTab,
+    notifCount: Int,
+    onSelect: (CoverTab) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)
+            .clip(RoundedCornerShape(28.dp))
+            .background(CFlipColors.NavFill)
+            .border(1.dp, CFlipColors.CardStroke, RoundedCornerShape(28.dp))
+            .padding(6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        tabs.forEach { t ->
+            val selected = t == current
+            Box(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(if (selected) CFlipColors.Accent else Color.Transparent)
+                    .clickable { onSelect(t) }
+                    .padding(horizontal = if (selected) 12.dp else 9.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    BadgedBox(badge = {
+                        if (t == CoverTab.NOTIFS && notifCount > 0 && !selected) {
+                            Badge(containerColor = CFlipColors.Danger) { Text(notifCount.toString()) }
+                        }
+                    }) {
+                        Icon(t.icon, contentDescription = t.label,
+                            tint = if (selected) CFlipColors.AccentDark else CFlipColors.TextSecondary,
+                            modifier = Modifier.size(20.dp))
+                    }
+                    if (selected) {
+                        Text(t.label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold,
+                            color = CFlipColors.AccentDark)
+                    }
+                }
+            }
+        }
+    }
 }

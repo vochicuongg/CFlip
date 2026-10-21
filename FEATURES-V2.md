@@ -21,7 +21,8 @@ của app mẫu; mọi tính năng làm được đều mở sẵn, không paywa
 | # | Tính năng | Phiên bản dự kiến | Ghi chú hiện thực riêng của CFlip |
 |---|---|---|---|
 | 1 | **Hidden Apps** (ẩn app khỏi ngăn kéo) | **v1.3 ✅** | Lọc ngay trong AppRepository nên mọi bề mặt đều tôn trọng; giữ app → menu → Ẩn; quản lý ở tab Style |
-| 2 | Chỉ báo pin trên cover (Home + widget) | v1.3 | BatteryManager sticky intent, cập nhật theo phút |
+| 2 | Chỉ báo pin trên cover (Home + widget) | **2.0 ✅** (Home + thanh trạng thái) | BatteryManager sticky intent, cập nhật 30 giây; widget để sau |
+| 1b | **Thiết kế lại toàn bộ giao diện (CFlip 2.0)** | **2.0 ✅** | Design system riêng: thẻ kính (glass card), accent mint, thanh điều hướng dạng pill nổi có huy hiệu thông báo, Home hero (đồng hồ lớn + pin + đang phát + yêu thích), lưới app có sao ghim, Media có đĩa tròn + nút phát lớn, Quick dạng ô gạch — code giao diện tự viết 100% |
 | 3 | Custom Groups (nhóm app tuỳ ý, không giới hạn) | v1.4 | Nhóm lưu DataStore-style SharedPreferences; chip chọn nhóm ở tab Apps |
 | 4 | Huy hiệu số thông báo trên icon app (badges) | v1.4 | Đếm từ NotificationState theo package |
 | 5 | Banner thông báo mới trên cover | v1.4 | Banner tự ẩn 4 giây khi có thông báo mới lúc cover đang hiện |

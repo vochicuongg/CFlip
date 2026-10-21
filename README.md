@@ -5,6 +5,7 @@ Chữ **C** là Cường — app này là bản tự viết (clean-room), mọi 
 mở sẵn, **không paywall, không premium**: tính năng nào làm được là dùng luôn.
 
 > v1.0.0 — hoàn thiện toàn bộ tính năng theo roadmap. Project tiền thân: MyFlip Launcher v0.1 (scaffold).
+> **v2.0.0 (22/10/2026)** — thiết kế lại toàn bộ giao diện: design system riêng (thẻ kính, accent mint `#7FE3C0`, thanh điều hướng pill nổi), Home hero có chỉ báo pin; kèm Hidden Apps (v1.3). Lộ trình: `FEATURES-V2.md`.
 
 ## Đối chiếu tính năng với cover launcher mẫu
 

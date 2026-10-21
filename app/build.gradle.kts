@@ -13,8 +13,8 @@ android {
         // Flip 5 ships Android 13 / One UI 5.1.1 -> minSdk 33 covers Flip 5/6/7.
         minSdk = 33
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.3.0"
+        versionCode = 7
+        versionName = "2.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -42,6 +42,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     testImplementation(libs.junit)
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
